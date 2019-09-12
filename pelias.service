@@ -1,0 +1,11 @@
+[Unit]
+Description=Launch Pelias geocoder
+
+[Service]
+Type=oneshot
+ExecStart=/home/vagrant/bin/pelias_start.sh
+ExecStop=/home/vagrant/bin/pelias_stop.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
