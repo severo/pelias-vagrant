@@ -31,17 +31,17 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "generic/debian10"
+  config.vm.box = "cloud-image/ubuntu-24.04"
+  config.vm.box_version = "20260323.0.0"
   config.disksize.size = "37GB" # Initial 32GB
   config.vm.base_mac = "080027783B7A"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.56.10"
 
-  # install docker and docker-compose
+  # install docker
   config.vm.provision :docker
-  config.vm.provision :docker_compose
   # init script
   config.vm.provision :file, source: 'pelias_start.sh', destination: "/home/vagrant/bin/pelias_start.sh"
   config.vm.provision :file, source: 'pelias_stop.sh', destination: "/home/vagrant/bin/pelias_stop.sh"
@@ -50,8 +50,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, path: "bootstrap.sh"
   # all the files have already been prepared, following https://github.com/pelias/docker/
   # only the useful files are copied
-  config.vm.provision :file, source: '/data/pelias_prod/placeholder', destination: "/home/vagrant/data/placeholder"
-  config.vm.provision :file, source: '/data/pelias_prod/interpolation', destination: "/home/vagrant/data/interpolation"
-  config.vm.provision :file, source: '/data/pelias_prod/elasticsearch', destination: "/home/vagrant/data/elasticsearch"
+  # config.vm.provision :file, source: '/data/pelias_prod/placeholder', destination: "/home/vagrant/data/placeholder"
+  # config.vm.provision :file, source: '/data/pelias_prod/interpolation', destination: "/home/vagrant/data/interpolation"
+  # config.vm.provision :file, source: '/data/pelias_prod/elasticsearch', destination: "/home/vagrant/data/elasticsearch"
 
 end
