@@ -8,6 +8,8 @@ The goal of this repository is to create a VirtualBox virtual machine that conta
 
 The virtual machine is created using [Vagrant](https://developer.hashicorp.com/vagrant), from the [Vagrantfile](./Vagrantfile) provided in this repository.
 
+If you want to use the Pelias geocoder for a different region, look at https://github.com/pelias/docker/tree/master/projects to find the region identifier, and replace "brazil" with the appropriate region in the Vagrantfile and in the bash scripts.
+
 ## Requirements
 
 The instructions are for Ubuntu 25.10. Written on 15 April 2026.
@@ -15,7 +17,7 @@ The instructions are for Ubuntu 25.10. Written on 15 April 2026.
 Install VirtualBox:
 
 ```bash
-sudo apt update;
+sudo apt update
 sudo apt install virtualbox
 ```
 
@@ -85,8 +87,7 @@ vagrant halt
 
 ## Test the virtual machine
 
-TODO: This does not work:
 
 ```bash
-curl -X POST "http://192.168.56.10:4000/v1/search?text=Rua%20do%20Ouvidor%2C%20Rio%20de%20Janeiro" -H "accept: application/json"
+curl -X POST "http://localhost:4000/v1/search?text=Rua%20do%20Ouvidor%2C%20Rio%20de%20Janeiro"
 ```

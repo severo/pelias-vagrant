@@ -1,6 +1,9 @@
 #!/bin/bash
 set -x
 
+# set the password for the vagrant user
+echo "vagrant:vagrant" | sudo chpasswd
+
 apt update
 apt install -y git util-linux
 # apt install -y git parted util-linux
@@ -14,7 +17,7 @@ DATA=$HOME/data
 BIN=$HOME/bin
 
 mkdir -p $CODE $DATA $BIN
-chown 1000:1000 $CODE $DATA $BIN
+chown vagrant:vagrant $CODE $DATA $BIN
 
 cd $CODE
 rm -rf docker;
@@ -25,7 +28,7 @@ cd docker
 rm -f /usr/local/bin/pelias
 ln -s "$(pwd)/pelias" /usr/local/bin/pelias
 
-cd projects/portland-metro # replace with brazil when ready
+cd projects/brazil
 sed -i '/DATA_DIR/d' .env
 echo "DATA_DIR=$DATA" >> .env
 pelias compose pull
@@ -41,9 +44,6 @@ pelias compose up
 # optionally run tests after waiting for containers to fully boot
 sleep 10
 pelias test run
-# stop everything to avoid consuming resources when not needed
-pelias compose down
-pelias elastic stop
 
 chmod +x $BIN/pelias_start.sh
 chmod +x $BIN/pelias_stop.sh
