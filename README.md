@@ -4,13 +4,15 @@ This repository contains a Vagrant configuration to run the Pelias geocoder in a
 
 ## Overview
 
-The goal of this repository is to create a VirtualBox virtual machine that contains a working offline [Pelias](https://www.pelias.io/) geocoder for Brazil.
+The goal of this repository is to create a VirtualBox virtual machine that contains a working offline [Pelias](https://www.pelias.io/) geocoder.
 
 The virtual machine is created using [Vagrant](https://developer.hashicorp.com/vagrant), from the [Vagrantfile](./Vagrantfile) provided in this repository.
 
-If you want to use the Pelias geocoder for a different region, look at https://github.com/pelias/docker/tree/master/projects to find the region identifier, and replace "brazil" with the appropriate region in the Vagrantfile and in the bash scripts.
+If you want to use the Pelias geocoder for a different region, look at https://github.com/pelias/docker/tree/master/projects to find the region identifier, and adapt the environment variables accordingly.
 
-The creation requires two steps : a manual step in the host machine to download and prepare the data, and an automated step to create the virtual machine and provision it with the Pelias geocoder.
+The creation requires two steps:
+- one on the host machine to download and prepare the data,
+- and one to create the virtual machine and provision it with the Pelias geocoder and data.
 
 ## Requirements
 
@@ -44,7 +46,7 @@ vagrant --help
 
 ```bash
 # Adapt to your needs
-export PELIAS_PROJECT=portland-metro # smaller project. Try with it first, before trying with a bigger project like "brazil"
+export PELIAS_PROJECT=portland-metro # smaller project. Try with it first, before trying with another region.
 export PELIAS_DOCKER_DIR=~/tmp/docker
 export VAGRANT_PROJECT_DIR=~/tmp/pelias-vagrant
 ```
@@ -167,7 +169,7 @@ cd $VAGRANT_PROJECT_DIR
 vagrant up --provision
 ```
 
-For the "portland-metro" example, the provisioning process takes about 7 minutes, and the data copied to the virtual machine is about 6GB. The disk use is 17GB, inclding the 6GB of data.
+For the "portland-metro" example, the provisioning process takes about 7 minutes, and the data copied to the virtual machine is about 6GB. The disk use is 17GB, including the 6GB of data.
 
 ## Start the virtual machine
 
@@ -218,31 +220,3 @@ TODO: how to access these other services from :5000? See https://github.com/peli
 - http://localhost:4200/-122.650095/45.533467
 - http://localhost:4300/demo/#13/45.5465/-122.6351
 - http://localhost:4400/parse?address=1730+ne+26th+ave,+portland,+or
-
-
-## For Brazil
-
-For Brazil, step 1 is:
-
-```bash
-export PELIAS_PROJECT=brazil
-export PELIAS_DOCKER_DIR=~/tmp/docker
-export VAGRANT_PROJECT_DIR=~/tmp/pelias-vagrant
-cd ${PELIAS_DOCKER_DIR}/projects/${PELIAS_PROJECT}
-${VAGRANT_PROJECT_DIR}/host.sh
-```
-
-Step 2 is:
-
-```bash
-export PELIAS_MACHINE_SIZE="100GB"
-export PELIAS_PORT=6000
-cd $VAGRANT_PROJECT_DIR
-vagrant up --provision
-```
-
-Test:
-
-```bash
-curl -X POST "http://localhost:6000/v1/search?text=Rua%20do%20Ouvidor%2C%20Rio%20de%20Janeiro"
-```
