@@ -161,10 +161,18 @@ Step 2 is to create the virtual machine and provision it with the Pelias geocode
 Run the following command to create the virtual machine and provision it with the Pelias geocoder:
 
 ```bash
+export PELIAS_MACHINE_SIZE="12GB" # adapt to your needs (at least 10GB), to ensure the data can be copied to the machine. The default value is 8GB, which is not enough for the "portland-metro" example.
+cd $VAGRANT_PROJECT_DIR
 vagrant up --provision
 ```
 
+14:05
+For the "portland-metro" example, the provisioning process takes about 3 minutes, and the data copied to the virtual machine is about 5.8GB.
+
 ## Start the virtual machine
+
+> ![IMPORTANT]
+> The environment variables PELIAS_MACHINE_SIZE, PELIAS_DOCKER_DIR and PELIAS_PROJECT must be set before running any of the commands below.
 
 Any time you want to start the virtual machine, run:
 
@@ -184,11 +192,12 @@ Access the machine via SSH (no need to log in, as Vagrant takes care of that):
 vagrant ssh
 ```
 
-TODO:
-
-- which is the user and password to log in to the virtual machine from VirtualBox? https://portal.cloud.hashicorp.com/vagrant/discover/cloud-image/ubuntu-24.04
+You can also access the virtual machine directly via VirtualBox, and log in with the username "vagrant" and the password "vagrant".
 
 ## Stop the virtual machine
+
+> ![IMPORTANT]
+> The environment variables PELIAS_MACHINE_SIZE, PELIAS_DOCKER_DIR and PELIAS_PROJECT must be set before running any of the commands below.
 
 To stop the virtual machine, run:
 
@@ -200,5 +209,5 @@ vagrant halt
 
 
 ```bash
-curl -X POST "http://localhost:4000/v1/search?text=Rua%20do%20Ouvidor%2C%20Rio%20de%20Janeiro"
+curl -X POST "http://localhost:5000/v1/search?text=Rua%20do%20Ouvidor%2C%20Rio%20de%20Janeiro"
 ```

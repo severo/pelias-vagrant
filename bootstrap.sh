@@ -5,7 +5,6 @@ set -x
 echo "vagrant:vagrant" | sudo chpasswd
 
 apt update
-apt upgrade -y
 apt install -y git util-linux
 
 # See https://github.com/pelias/docker/
@@ -27,6 +26,7 @@ rm -f /usr/local/bin/pelias
 ln -s "$(pwd)/pelias" /usr/local/bin/pelias
 
 cp -r projects/${PELIAS_PROJECT:-portland-metro} $CODE/project/
+cd $CODE/project
 sed -i '/DATA_DIR/d' .env
 echo "DATA_DIR=$DATA" >> .env
 pelias compose pull

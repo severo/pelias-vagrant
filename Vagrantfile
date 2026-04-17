@@ -12,10 +12,11 @@ Vagrant.configure("2") do |config|
 
   project_name = ENV["PELIAS_PROJECT"]
   docker_dir = ENV["PELIAS_DOCKER_DIR"]
+  machine_size = ENV["PELIAS_MACHINE_SIZE"]
 
-  # Return an error if the project name or the data directory are not set, or if the data directory does not exist
-  if project_name.nil? || docker_dir.nil?
-    puts "Please set the PELIAS_PROJECT and PELIAS_DOCKER_DIR environment variables before running vagrant up."
+  # Return an error if the project name, the data directory, or the machine size are not set, or if the data directory does not exist
+  if project_name.nil? || docker_dir.nil? || machine_size.nil?
+    puts "Please set the PELIAS_PROJECT, PELIAS_DOCKER_DIR, and PELIAS_MACHINE_SIZE environment variables before running vagrant up."
     exit
   end
 
@@ -51,10 +52,10 @@ Vagrant.configure("2") do |config|
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "cloud-image/ubuntu-24.04"
   config.vm.box_version = "20260323.0.0"
-  config.disksize.size = "80GB"
+  config.disksize.size = machine_size
 
   # expose Pelias API
-  config.vm.network "forwarded_port", guest: 4000, host: 4000
+  config.vm.network "forwarded_port", guest: 4000, host: 5000
 
   # install docker
   config.vm.provision :docker
