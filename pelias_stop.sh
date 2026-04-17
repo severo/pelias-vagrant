@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x
 
-cd /home/vagrant/code/docker/projects/brazil
+cd /home/vagrant/code/project
 pelias compose down
 pelias elastic stop
