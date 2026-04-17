@@ -10,6 +10,26 @@ Vagrant.configure("2") do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
+  project_name = ENV["PELIAS_PROJECT"]
+  docker_dir = ENV["PELIAS_DOCKER_DIR"]
+  machine_size = ENV["PELIAS_MACHINE_SIZE"]
+  port = ENV["PELIAS_PORT"]
+
+  # Return an error if the project name, the data directory, the machine size, or the port are not set, or if the data directory does not exist
+  if project_name.nil? || docker_dir.nil? || machine_size.nil? || port.nil?
+    puts "Please set the PELIAS_PROJECT, PELIAS_DOCKER_DIR, PELIAS_MACHINE_SIZE, and PELIAS_PORT environment variables before running vagrant up."
+    exit
+  end
+
+  host_data_dir = "#{docker_dir}/projects/#{project_name}/data"
+  unless File.exist?(host_data_dir)
+    puts "The data directory #{host_data_dir} does not exist. Please create it and prepare the data as described in the README.md file before running vagrant up."
+    exit
+  end
+
+  config.vm.define "pelias-#{project_name}"
+  config.vm.hostname = "pelias-#{project_name}"
+
   required_plugins = %w( vagrant-disksize )
   _retry = false
   required_plugins.each do |plugin|
@@ -24,34 +44,27 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider "virtualbox" do |v|
-    v.name = "pelias"
+    v.name = "pelias-#{project_name}"
     v.memory = 8192
     v.cpus = 4
   end
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "generic/debian10"
-  config.disksize.size = "37GB" # Initial 32GB
-  config.vm.base_mac = "080027783B7A"
+  config.vm.box = "cloud-image/ubuntu-24.04"
+  config.vm.box_version = "20260323.0.0"
+  config.disksize.size = machine_size
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  config.vm.network "private_network", ip: "192.168.33.10"
+  # expose Pelias API
+  config.vm.network "forwarded_port", guest: 4000, host: port
 
-  # install docker and docker-compose
+  # install docker
   config.vm.provision :docker
-  config.vm.provision :docker_compose
   # init script
   config.vm.provision :file, source: 'pelias_start.sh', destination: "/home/vagrant/bin/pelias_start.sh"
   config.vm.provision :file, source: 'pelias_stop.sh', destination: "/home/vagrant/bin/pelias_stop.sh"
   config.vm.provision :file, source: 'pelias.service', destination: "/home/vagrant/bin/pelias.service"
+  config.vm.provision :file, source: host_data_dir, destination: "/home/vagrant/data"
   # bootstrap
-  config.vm.provision :shell, path: "bootstrap.sh"
-  # all the files have already been prepared, following https://github.com/pelias/docker/
-  # only the useful files are copied
-  config.vm.provision :file, source: '/data/pelias_prod/placeholder', destination: "/home/vagrant/data/placeholder"
-  config.vm.provision :file, source: '/data/pelias_prod/interpolation', destination: "/home/vagrant/data/interpolation"
-  config.vm.provision :file, source: '/data/pelias_prod/elasticsearch', destination: "/home/vagrant/data/elasticsearch"
-
+  config.vm.provision :shell, path: "bootstrap.sh", env: {"PELIAS_PROJECT" => project_name}
 end
