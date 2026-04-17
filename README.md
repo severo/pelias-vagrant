@@ -41,7 +41,7 @@ vagrant --version
 vagrant --help
 ```
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > Set the following environment variables, and ensure they are set during all the steps of this tutorial.
 
 ```bash
@@ -173,7 +173,7 @@ For the "portland-metro" example, the provisioning process takes about 7 minutes
 
 ## Start the virtual machine
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > The environment variables PELIAS_MACHINE_SIZE, PELIAS_DOCKER_DIR, PELIAS_PROJECT and PELIAS_PORT must be set before running any of the commands below.
 
 Any time you want to start the virtual machine, run:
@@ -198,7 +198,7 @@ You can also access the virtual machine directly via VirtualBox, and log in with
 
 ## Stop the virtual machine
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > The environment variables PELIAS_MACHINE_SIZE, PELIAS_DOCKER_DIR and PELIAS_PROJECT must be set before running any of the commands below.
 
 To stop the virtual machine, run:
