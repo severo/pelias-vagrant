@@ -13,10 +13,11 @@ Vagrant.configure("2") do |config|
   project_name = ENV["PELIAS_PROJECT"]
   docker_dir = ENV["PELIAS_DOCKER_DIR"]
   machine_size = ENV["PELIAS_MACHINE_SIZE"]
+  port = ENV["PELIAS_PORT"]
 
-  # Return an error if the project name, the data directory, or the machine size are not set, or if the data directory does not exist
-  if project_name.nil? || docker_dir.nil? || machine_size.nil?
-    puts "Please set the PELIAS_PROJECT, PELIAS_DOCKER_DIR, and PELIAS_MACHINE_SIZE environment variables before running vagrant up."
+  # Return an error if the project name, the data directory, the machine size, or the port are not set, or if the data directory does not exist
+  if project_name.nil? || docker_dir.nil? || machine_size.nil? || port.nil?
+    puts "Please set the PELIAS_PROJECT, PELIAS_DOCKER_DIR, PELIAS_MACHINE_SIZE, and PELIAS_PORT environment variables before running vagrant up."
     exit
   end
 
@@ -55,7 +56,7 @@ Vagrant.configure("2") do |config|
   config.disksize.size = machine_size
 
   # expose Pelias API
-  config.vm.network "forwarded_port", guest: 4000, host: 5000
+  config.vm.network "forwarded_port", guest: 4000, host: port
 
   # install docker
   config.vm.provision :docker
@@ -63,8 +64,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :file, source: 'pelias_start.sh', destination: "/home/vagrant/bin/pelias_start.sh"
   config.vm.provision :file, source: 'pelias_stop.sh', destination: "/home/vagrant/bin/pelias_stop.sh"
   config.vm.provision :file, source: 'pelias.service', destination: "/home/vagrant/bin/pelias.service"
+  config.vm.provision :file, source: host_data_dir, destination: "/home/vagrant/data"
   # bootstrap
   config.vm.provision :shell, path: "bootstrap.sh", env: {"PELIAS_PROJECT" => project_name}
-  # all the files have already been prepared in step 1 (see README.md), so we just need to copy them to the virtual machine
-  config.vm.provision :file, source: "#{host_data_dir}", destination: "/home/vagrant/data"
 end

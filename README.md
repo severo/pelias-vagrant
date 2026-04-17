@@ -161,18 +161,18 @@ Step 2 is to create the virtual machine and provision it with the Pelias geocode
 Run the following command to create the virtual machine and provision it with the Pelias geocoder:
 
 ```bash
-export PELIAS_MACHINE_SIZE="12GB" # adapt to your needs (at least 10GB), to ensure the data can be copied to the machine. The default value is 8GB, which is not enough for the "portland-metro" example.
+export PELIAS_MACHINE_SIZE="20GB" # adapt to your needs (at least 15GB for Pelias + the data), to ensure the data can be copied to the machine. The default value is 8GB, which is not enough for the "portland-metro" example.
+export PELIAS_PORT=5000
 cd $VAGRANT_PROJECT_DIR
 vagrant up --provision
 ```
 
-14:05
-For the "portland-metro" example, the provisioning process takes about 3 minutes, and the data copied to the virtual machine is about 5.8GB.
+For the "portland-metro" example, the provisioning process takes about 7 minutes, and the data copied to the virtual machine is about 6GB. The disk use is 17GB, inclding the 6GB of data.
 
 ## Start the virtual machine
 
 > ![IMPORTANT]
-> The environment variables PELIAS_MACHINE_SIZE, PELIAS_DOCKER_DIR and PELIAS_PROJECT must be set before running any of the commands below.
+> The environment variables PELIAS_MACHINE_SIZE, PELIAS_DOCKER_DIR, PELIAS_PROJECT and PELIAS_PORT must be set before running any of the commands below.
 
 Any time you want to start the virtual machine, run:
 
@@ -208,6 +208,41 @@ vagrant halt
 ## Test the virtual machine
 
 
+- http://localhost:5000/v1/search?text=portland
+- http://localhost:5000/v1/search?text=1901+Main+St
+- http://localhost:5000/v1/reverse?point.lon=-122.650095&point.lat=45.533467
+
+
+TODO: how to access these other services from :5000? See https://github.com/pelias/documentation?tab=readme-ov-file#endpoint-descriptions
+- http://localhost:4100/demo/#eng
+- http://localhost:4200/-122.650095/45.533467
+- http://localhost:4300/demo/#13/45.5465/-122.6351
+- http://localhost:4400/parse?address=1730+ne+26th+ave,+portland,+or
+
+
+## For Brazil
+
+For Brazil, step 1 is:
+
 ```bash
-curl -X POST "http://localhost:5000/v1/search?text=Rua%20do%20Ouvidor%2C%20Rio%20de%20Janeiro"
+export PELIAS_PROJECT=brazil
+export PELIAS_DOCKER_DIR=~/tmp/docker
+export VAGRANT_PROJECT_DIR=~/tmp/pelias-vagrant
+cd ${PELIAS_DOCKER_DIR}/projects/${PELIAS_PROJECT}
+${VAGRANT_PROJECT_DIR}/host.sh
+```
+
+Step 2 is:
+
+```bash
+export PELIAS_MACHINE_SIZE="100GB"
+export PELIAS_PORT=6000
+cd $VAGRANT_PROJECT_DIR
+vagrant up --provision
+```
+
+Test:
+
+```bash
+curl -X POST "http://localhost:6000/v1/search?text=Rua%20do%20Ouvidor%2C%20Rio%20de%20Janeiro"
 ```

@@ -6,6 +6,9 @@ echo "vagrant:vagrant" | sudo chpasswd
 
 apt update
 apt install -y git util-linux
+# parted
+# parted ---pretend-input-tty /dev/sda 'unit % resizepart 1 yes 100%'
+# resize2fs /dev/sda1
 
 # See https://github.com/pelias/docker/
 HOME=/home/vagrant
