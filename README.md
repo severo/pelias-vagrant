@@ -51,7 +51,6 @@ export PELIAS_DOCKER_DIR=~/tmp/docker
 export VAGRANT_PROJECT_DIR=~/tmp/pelias-vagrant
 ```
 
-
 Get the pelias/docker repository and create a symbolic link to the pelias command:
 
 ```bash
@@ -66,7 +65,7 @@ sudo rm -f /usr/local/bin/pelias
 sudo ln -s "$PELIAS_DOCKER_DIR/pelias" /usr/local/bin/pelias
 ```
 
-Get this repository and go to the project directory:
+Get this repository:
 
 ```bash
 mkdir -p $VAGRANT_PROJECT_DIR
@@ -131,6 +130,8 @@ All steps completed
 Fri Apr 17 13:32:34 CEST 2026
 ```
 
+### Tests
+
 At this point, Pelias is running on your host machine. You can test that it's working by accessing the API:
 
 - http://localhost:4000/v1/search?text=portland
@@ -140,6 +141,103 @@ At this point, Pelias is running on your host machine. You can test that it's wo
 - http://localhost:4200/-122.650095/45.533467
 - http://localhost:4300/demo/#13/45.5465/-122.6351
 - http://localhost:4400/parse?address=1730+ne+26th+ave,+portland,+or
+
+You can also try https://pelias.github.io/compare, configuring the local geocoder with http://localhost:4000. Note that you can also run the compare tool locally, see https://github.com/pelias/compare.
+
+If you try the following address:
+
+```
+6700 NE Prescott St, Portland, OR 97218, United States
+```
+
+Pelias will return one point with the expected result, given by OpenAddresses: https://pelias.github.io/compare/#/v1/search?text=6700+NE+Prescott+St%2C+Portland%2C+OR+97218%2C+United+States&debug=1
+
+For the following address:
+
+```
+1955, Northwest Raleigh Street, Slabtown, Northwest District, Portland, Multnomah County, Oregon, 97209, USA
+```
+
+Pelias gives 2 results with OpenAddresses and 3 results with OpenStreetMap, all with confidence 1 but not the same coordinates 🤷. Only two of them match the street number: https://pelias.github.io/compare/#/v1/search?text=1955%2C+Northwest+Raleigh+Street%2C+Slabtown%2C+Northwest+District%2C+Portland%2C+Multnomah+County%2C+Oregon%2C+97209%2C+USA&debug=1
+
+### Detailed process
+
+Once in the Portland project directory, and with the environment variables set, you can run the following commands to download the data, one at a time:
+
+```
+pelias download wof
+pelias download oa
+pelias download osm # beware: it downloads an archive from 2022!
+```
+
+At that point:
+
+```
+➜  portland-metro git:(master) ✗ du -sh data/*
+4.0K    data/blacklist
+41M     data/elasticsearch
+443M    data/openaddresses
+53M     data/openstreetmap
+5.2G    data/whosonfirst
+```
+
+Then prepare the data:
+
+```
+pelias prepare polylines # only for OSM, creates data/polylines/extract.0sv
+pelias prepare placeholder # only uses WOF? creates data/placeholder/store.sqlite3 and data/placeholder/wof.extract
+pelias prepare interpolation # uses prepared polylines, then openadresses and openstreetmap, creates data/interpolation/address.db, data/interpolation/street.db and other temporary? files
+```
+
+At that point:
+
+```
+➜  portland-metro git:(master) ✗ du -sh data/*
+4.0K    data/blacklist
+41M     data/elasticsearch
+114M    data/interpolation
+443M    data/openaddresses
+53M     data/openstreetmap
+17M     data/placeholder
+3.8M    data/polylines
+8.0K    data/tiger
+5.2G    data/whosonfirst
+```
+
+Import to Elasticsearch:
+
+```
+pelias import wof
+pelias import oa # <- take some time (160s for Portland)
+pelias import osm
+pelias import polylines
+```
+
+Then start the containers:
+
+```
+pelias compose up
+```
+
+The running containers are:
+
+```
+➜  portland-metro git:(master) ✗ pelias compose ps
+NAME                   IMAGE                          COMMAND                  SERVICE         CREATED          STATUS          PORTS
+pelias_api             pelias/api:master              "./bin/start"            api             42 seconds ago   Up 40 seconds   0.0.0.0:4000->4000/tcp
+pelias_elasticsearch   pelias/elasticsearch:7.17.27   "/bin/tini -- /usr/l…"   elasticsearch   20 minutes ago   Up 20 minutes   127.0.0.1:9200->9200/tcp, 127.0.0.1:9300->9300/tcp
+pelias_interpolation   pelias/interpolation:master    "./interpolate serve…"   interpolation   42 seconds ago   Up 40 seconds   127.0.0.1:4300->4300/tcp
+pelias_libpostal       pelias/libpostal-service       "/bin/wof-libpostal-…"   libpostal       42 seconds ago   Up 40 seconds   127.0.0.1:4400->4400/tcp
+pelias_pip-service     pelias/pip-service:master      "./bin/start"            pip             42 seconds ago   Up 40 seconds   127.0.0.1:4200->4200/tcp
+pelias_placeholder     pelias/placeholder:master      "./cmd/server.sh"        placeholder     42 seconds ago   Up 40 seconds   127.0.0.1:4100->4100/tcp
+```
+
+and the logs should not contain errors:
+
+```
+pelias compose logs
+```
+
 
 ### Uninstall
 
